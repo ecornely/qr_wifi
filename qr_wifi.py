@@ -1,5 +1,7 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
+
+#Add libraries installed in a specific folder to the python path
 import sys
 sys.path.insert(0, "/homez.62/ecornely/python_lib/lib/python2.6/site-packages")
 sys.path.insert(0, "/homez.62/ecornely/python_lib/lib/python2.6/site-packages/qrcode-5.1-py2.6.egg")
@@ -8,14 +10,14 @@ sys.path.insert(0, "/homez.62/ecornely/python_lib/lib/python2.6/site-packages/se
 sys.path.insert(0, "/homez.62/ecornely/python_lib/lib/python2.6/site-packages/pymaging-0.1-py2.6.egg")
 sys.path.insert(0, "/homez.62/ecornely/python_lib/lib/python2.6/site-packages/pymaging_png-0.1-py2.6.egg")
 
+#Import libraries
 import cgi
 import qrcode
 import PIL
 from PIL import Image
-import cStringIO
-import base64
-    
-def generate(info="WIFI:S:ecornelyNet;T:WPA;P:aristochats;;"):
+
+def generate(info="WIFI:S:mynetwork;T:WPA;P:mypassword;;"):
+    """Generates a QR-code from a string and returns a PIL Image object"""
     qr = qrcode.QRCode(
         version=1,
         error_correction=qrcode.constants.ERROR_CORRECT_H,
@@ -26,13 +28,18 @@ def generate(info="WIFI:S:ecornelyNet;T:WPA;P:aristochats;;"):
     qr.make(fit=True)
 
     img = qr.make_image()
+    #If image is not 555 px resize it
     if( img.size[0] != 555 ):
         img = img.resize( (555,555), PIL.Image.ANTIALIAS)
+    # Convert from b/w to RGB
     img = img.convert(mode="RGB")
+    #Load logo
     logo=Image.open("logo.png")
+    #Insert the wifi logo at 185/185 px
     img.paste(logo, (185,185))
     return img
 
+# CGI part to get form information
 params = cgi.FieldStorage()
 ssid = params.getvalue("SSID")
 password = params.getvalue("PASSWORD")
@@ -68,8 +75,3 @@ else:
     sys.stdout.write("Cache-Control: no-store, no-cache, must-revalidate\n")
     sys.stdout.write("Content-type: image/png\n\n")
     qr.save(sys.stdout, "PNG")
-    #print("Content-type: image/png\n\n")
-    #f=cStringIO.StringIO()
-    #qr.save(f, "PNG")
-    #f.seek(0)
-    #print(f.read())
